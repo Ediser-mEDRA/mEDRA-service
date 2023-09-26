@@ -5,8 +5,8 @@ This API allows mEDRA users who deposits content metadata in mEDRA systems to re
 ## Endpoint
 
 The API endpoint to access the service is \
-Testing environement: `https://www-medra-dev.medra.org/servlet/ws/export-metadata` \
-Production environement: `https://www.medra.org/servlet/ws/export-metadata`
+Testing environement: `https://www-medra-dev.medra.org/servlet/ws/export-metadata` (UNDER CONSTRUCTION)\
+Production environement: `https://www.medra.org/servlet/ws/export-metadata` (UNDER CONSTRUCTION)
 
 ## Autentication
 
@@ -50,3 +50,29 @@ The table below lists all the parameters (mandatory or optional) expected by the
 > | Date | Date in one of the following format <br/> YYYY <br/> YYYY-MM <br/> YYYY-MM-DD | `2003` <br/> `2003-11` <br/> `2003-11-29` |
 > | Format | Enumeration, allowed values are: <br/> DOAJ <br/> CROSS44 <br/> CROSS48 <br/> ONIX <br/> PUBMED | `DOAJ` <br/> `ONIX` |
 > | DateRange | A range of date with the following meaning: <br/> a. From a date to now <br/> [{Date},] <br/> b. Until a date <br/> [,{Date}] <br> c. Between two dates <br/> [{Date},{Date}] | a. From 01/02/2022 to now <br/> `[2022-02-01,]` <br/> b. Until 01/02/2022 <br/> `[,2022-02-01]` <br> c. From 01/02/2022 to 03/04/2023 <br/> `[2022-02-01,2023-04-03]`|
+
+> #### Format description
+> | **ENUM** | **Format Description** | **Note** |
+> | --- | --- | --- |
+> | ONIX | ONIX for DOI 2.0 (last release of the schema) | The old format (1.0/1.1) are tranformed in the last format 2.0 |
+> | CROSS44 | Crossref Schema 4.4.2 | |
+> | CROSS48 | Crossref Schema 4.8.1 | |
+> | DOAJ | DOAJ (no version) | |
+> | PUBMED | PUBMED JATS | |
+>
+> In the future, evaluation is planned to export DOI metadata content in other format such as:
+> >- DOI Schema
+> >- Format of our DOI Content Negotiation
+
+## Some instances of HTTP requests
+> - Export in DOAJ format of DOIs metadata with prefix `10.5236` and ISSN `1234-3456` <br/>
+Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?issn=1234-456&format=DOAJ&prefix=10.5236` <br/>
+Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?issn=1234-456&format=DOAJ&prefix=10.5236` <br/>
+> - Export in ONIX format of DOIs metadata with prefix `10.5236` and received the last update of metadata `2023-03-31` <br/>
+Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&updateDate=[2023-03-31,2023-03-31]` <br/>
+Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&updateDate=[2023-03-31,2023-03-31]` <br/>
+> - Export in CROSS44 format of DOIs metadata with prefix `10.5236` and ISBN `978-88-00-00091-1`, published in `2023` and the metadata was created between `2023-01-12` and `2023-03-31` <br/>
+Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=CROSS44&prefix=10.5236&isbn=978-88-00-00091-1&publicationDate=2023&creationDate=[2023-01-12,2023-03-31]` <br/>
+Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=CROSS44&prefix=10.5236&isbn=978-88-00-00091-1&publicationDate=2023&creationDate=[2023-01-12,2023-03-31]` <br/>
+
+## Validation of  HTTP requests input parameters
