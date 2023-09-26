@@ -4,8 +4,8 @@ This API allows mEDRA users who deposits content metadata in mEDRA systems to re
 
 ## Endpoint
 
-The API endpoint to access the service is
-Testing environement: `https://www-medra-dev.medra.org/servlet/ws/export-metadata`
+The API endpoint to access the service is \
+Testing environement: `https://www-medra-dev.medra.org/servlet/ws/export-metadata` \
 Production environement: `https://www.medra.org/servlet/ws/export-metadata`
 
 ## Autentication
@@ -14,10 +14,10 @@ The API service is accessible upon basic authentication. The credentials are the
 
 ## Authorization
 
-### User
+#### User
 
 The authorization rules on user is the same already present in mEDRA systems, and each user is authorized to export metadata content of their(s) prefix(es).
 
-### Prefix
+#### Prefix
 
 Any user must operated only on their(s) prefix(es). Any request to the API service with prefix of others is forbidden.
