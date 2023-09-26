@@ -28,5 +28,9 @@ The Http method allowed is **GET**, and the api accepts the following [parameter
 
 ## Parameters
 
-The table below lists all the parameters (mandatory or optional) expected by the export metadata API service. There is no priority, order, etc., in parameters, the user could provide it (or them) to the API as prefered. The metadata export result is obtained considering all the parameters provided to the API in AND conditions.
+The table below lists all the parameters (mandatory or optional) expected by the export metadata API service. There is no priority, order, etc., in parameters, the user could provide it (or them) to the API as prefered. The metadata export result is obtained considering all the parameters provided to the API in AND conditions. \
 | **Parameter** | **Type** | **Case sensitive** | **Description** | **Sample** | **Notes** |
+| --- | --- | --- | --- | --- | --- |
+| doi | DOIList | No | DOI List desired to obtain metadata | doi=10.5236/SAW
+doi=10.5236/SAW,10.5236/SAV,10.5236/MONP,10.5236/MONW,10.5236/MONCHW,10.5236/STW
+| For more than one DOI, the token separator is comma (,). Non more than 30 DOIs must be requested for metadata export |
