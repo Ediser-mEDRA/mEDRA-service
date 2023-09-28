@@ -33,10 +33,10 @@ The table below lists all the parameters (mandatory or optional) expected by the
 | **Parameter** | **Type** | **Case sensitive** | **Description** | **Sample** | **Notes** |
 | --- | --- | --- | --- | --- | --- |
 | `doi` | DOIList | No | DOI List desired to obtain metadata | `doi=10.5236/SAW` <br/> `doi=10.5236/SAW,10.5236/SAV,10.5236/MONP`| For more than one DOI, the token separator is comma (,). Non more than 30 DOIs must be requested for metadata export |
-| `prefix` | String | No | The prefix desired to obtain in export metadata | `prefix=10.5236`| Only for one prefix the metadata export must be requested |
-| `issn` | String | No | The issn desired to obtain in export metadata result | `issn=1946-2166` <br/> `issn=19462166` | Only for one issn the metadata export must be requested. issn with hyphen is also allowed as issn without hyphen. <br/> Please pay attention to special characters dash and en-dash|
-| `isbn` | String | No | The isbn desired to obtain in export metadata return | `isbn=978-88-89637-15-9` <br/> `issn=9788889637159` | Only for one isbn the metadata export must be requested. isbn with hyphen is also allowed as issn without hyphen. <br/> Please pay attention to special characters dash and en-dash|
-| `jounalIssueNumber` | String | No | The DOI Journal Issue Number desired in export metadata result | `journalIssueNumber=9` | Only for one DOI Journal Issue Number the metadata export must be requested.|
+| `prefix` | String | No | The prefix desired to obtain in export metadata | `prefix=10.5236`| Only for one prefix the metadata export must be requested. The searched metadata must exactly match the prefix |
+| `issn` | String | No | The issn desired to obtain in export metadata result | `issn=1946-2166` <br/> `issn=19462166` | Only for one issn the metadata export must be requested. issn with hyphen is also allowed as issn without hyphen. The searched metadata must exactly match the issn <br/> Please pay attention to special characters dash and en-dash|
+| `isbn` | String | No | The isbn desired to obtain in export metadata return | `isbn=978-88-89637-15-9` <br/> `issn=9788889637159` | Only for one isbn the metadata export must be requested. isbn with hyphen is also allowed as issn without hyphen. The searched metadata must exactly match the isbn <br/> Please pay attention to special characters dash and en-dash|
+| `jounalIssueNumber` | String | No | The DOI Journal Issue Number desired in export metadata result | `journalIssueNumber=9` | Only for one DOI Journal Issue Number the metadata export must be requested. The searched metadata must exactly match the journalIssueNumber |
 | `jounalIssueDate` | Date | No | The DOI Journal Issue Date desired in export metadata result | `journalIssueDate=2023` <br/> `journalIssueDate=2023-07` <br> `journalIssueDate=2023-07-25` | The DOI Journal Issue Date apply the `right LIKE` search retrieve. A record with `202305` present in the database will not be return if the DOI Journal Issue Date searched for is `20230513`. Instead, a record with `20230513` present in the database will be return if the DOI Journal Issue Date searched for is `20230513` |
 | `format` | Format | Yes | The format desired for export metadata result | `format=DOAJ` | Only for one format the metadata export must be requested |
 | `publicationDate` | Date | No | The DOI publication Date desired in export metadata result | `publicationDate=2023` <br/> `publicationDate=2023-07` <br> `publicationDate=2023-07-25` | The DOI publication Date apply the `right LIKE` search retrieve. A record with `202305` present in the database will not be return if the DOI publication Date searched for is `20230513`. Instead, a record with `20230513` present in the database will be return if the DOI Journal Issue Date searched for is `20230513` |
@@ -76,3 +76,48 @@ Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-me
 Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=CROSS44&prefix=10.5236&isbn=978-88-00-00091-1&publicationDate=2023&creationDate=[2023-01-12,2023-03-31]` <br/>
 
 ## Validation of  HTTP requests input parameters
+The API implementation validates the input parameters in the following order:
+1. If the mandatory parameter `format` is not present in the request, a 400 Bad Request is returned with error message `The format is required`
+2. In the request, if both parameters `doi` and `prefix` are present or neither the `doi` parameter nor the `prefix` parameter are present, a 400 Bad Request is returned with such error `Either doi or prefix is required`
+3. if the `doi` parameter is present in the request and there are other parameters besides `format`, a 400 Bad Request is returned with the following error `The syntax for DOI request is /ws/export-metadata?format=&doi=`
+
+## Some instances of expected HTTP requests output
+> | **URL** | **HTTP Code** | **HTTP Status Message** |
+> | --- | --- | --- |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata` | `400` | `format is required` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX` | `400` | `either doi or prefix is required` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&doi=10.100` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&doi=10.100` | `400` | `either doi or prefix is required` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&doi=10.100` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&doi=10.100` | `200` | `OK` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236` | `200` | `OK` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?updateDate=[2023-03-31,2023-03-31]` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?updateDate=[2023-03-31,2023-03-31]` | `400` | `format is required` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&updateDate=[2023-03-31,2023-03-31]` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&updateDate=[2023-03-31,2023-03-31]` | `400` | `either doi or prefix is required` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&doi=10.100&updateDate=[2023-03-31,2023-03-31]` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&doi=10.100&updateDate=[2023-03-31,2023-03-31]` | `400` | `either doi or prefix is required` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&doi=10.100&updateDate=[2023-03-31,2023-03-31]` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&doi=10.100&updateDate=[2023-03-31,2023-03-31]` | `400` | `the syntax for DOI request is /ws/export-metadata?format=&doi=` |
+> |Testing environment: <br/> `https://www-medra-dev.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&updateDate=[2023-03-31,2023-03-31]` <br/> Production environment: <br/> `https://www.medra.org/servlet/ws/export-metadata?format=ONIX&prefix=10.5236&updateDate=[2023-03-31,2023-03-31]` | `200` | `OK` |
+>
+> Moreover, further validations are made for each parameter present in the HTTP request, as the table below recaps:
+>
+> | **Parameter** | **Type** | **Validation** |
+> | --- | --- | --- |
+> | doi | DOIList | If the string is empty, a 400 Bad Request is returned with message `the value in doi is empty`. No further validation in made on the string syntax, neither in the DOI syntax or constraints |
+> | prefix | string | If the string is empty, a 400 Bad Request is returned with message `the value in prefix is empty`. No further validation in made on the string syntax |
+> | issn | string | If the string is empty, a 400 Bad Request is returned with message `the value in issn is empty`. No further validation in made on the string syntax |
+> | isbn | string | If the string is empty, a 400 Bad Request is returned with message `the value in isbn is empty`. No further validation in made on the string syntax |
+> | journalIssueNumber | string | If the string is empty, a 400 Bad Request is returned with message `the value in journalIssueNumber is empty`. No further validation in made on the string syntax |
+> | journalIssueDate | Date | It's restrict to Date format, otherwise a 400 Bad Request is returned with message `the value in journalIssueDate is not valid`. Doesn't matter if the date really exists (i.e. the value `2324-13-33` or `2023-02-30` is accepted) |
+> | format | Format | the value must be among those present in the enum Format, otherwise a 400 Bad Request is returned with message `the value format is not valid`. The same error is thrown in case of empty value in format parameter |
+> | publicationDate | Date | It's restrict to Date format, otherwise a 400 Bad Request is returned with message `the value in publicationDate is not valid`. Doesn't matter if the date really exists (i.e. the value `2324-13-33` or `2023-02-30` is accepted) |
+> | creationDate | DateRange | It's restrict to DateRange type, otherwise a 400 Bad Request is returned with message `the value in creationDate is not valid`. Doesn't matter if the date really exists (i.e. the value `2324-13-33` or `2023-02-30` is accepted), neither the accuracy of the range (i.e. `[2022-12-01,2021-12-01]` is accepted) |
+> | updateDate | DateRange | It's restrict to DateRange type, otherwise a 400 Bad Request is returned with message `the value in updateDate is not valid`. Doesn't matter if the date really exists (i.e. the value `2324-13-33` or `2023-02-30` is accepted), neither the accuracy of the range (i.e. `[2022-12-01,2021-12-01]` is accepted) |
+
+## HTTP Response
+The HTTP response will contained a zip file (MIME type "application/zip").
+## HTTP Status Response Code
+The possible HTTP status code response are present in the following table:
+> | **Code** | **Status** | **Message description** |
+> | --- | --- | --- |
+> | 200 | OK | Request successfully completed, the response contains the zip file with all the xml file generated |
+> | 400 | Bad Request | Invalid request, i.e no mandatory parameter is present, Date format is not valid, no parameter is specified  |
+> | 401 | Unauthorized | Invalid credentials (username or password is wrong) |
+> | 403 | Forbidden | The user have no grant on prefix, or no right to export metadata |
+> | 500 | Internal Server Error | Internal error while processing the request  |
